@@ -11,6 +11,9 @@
     "test:e2e": "playwright test",
     "test:e2e:report": "allure generate allure-results --clean -o allure-report && allure open allure-report"
   },
+  "jest": {
+    "testPathIgnorePatterns": ["/node_modules/", "/tests/e2e/"]
+  },
   "jest-junit": {
     "outputDirectory": "reports",
     "outputName": "junit.xml"
