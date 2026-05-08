@@ -14,7 +14,8 @@ class ServicioProductos {
   }
 
   crearProducto(nombre, precio, stock) {
-    if (!nombre || nombre.trim() === '') throw new Error('El nombre es obligatorio');
+    // if (!nombre || nombre.trim() === '') throw new Error('nombre requerido');
+    if (!nombre || nombre.trim() === '') throw new Error('nombre requerido');
     if (precio == null || precio < 0) throw new Error('El precio debe ser mayor o igual a 0');
     if (stock == null || stock < 0) throw new Error('El stock debe ser mayor o igual a 0');
     return this.repositorio.crear(nombre.trim(), precio, stock);
