@@ -8,7 +8,7 @@ module.exports = defineConfig({
   ],
   use: {
     headless: true,
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    screenshot: 'on',
+    video: 'on',
   },
 });
