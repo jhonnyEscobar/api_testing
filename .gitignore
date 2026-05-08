@@ -24,6 +24,8 @@ coverage
 
 # Reportes de pruebas generados localmente
 reports/
+allure-results/
+allure-report/
 
 # nyc test coverage
 .nyc_output

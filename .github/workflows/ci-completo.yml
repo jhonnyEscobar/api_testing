@@ -1,4 +1,4 @@
-name: CI - Completo (Unitarias + Integración + Reporte)
+name: CI - Completo (Unitarias + Integración + E2E + Reporte)
 
 on:
   push:
@@ -76,10 +76,48 @@ jobs:
           path: reports/junit-integracion.xml
           reporter: jest-junit
 
+  pruebas-e2e:
+    name: Pruebas E2E (Playwright + Allure)
+    runs-on: ubuntu-latest
+    needs: pruebas-integracion
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Instalar navegador Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar pruebas E2E
+        run: npm run test:e2e
+
+      - name: Generar reporte Allure
+        if: always()
+        run: npx allure generate allure-results --clean -o allure-report
+
+      - name: Subir reporte Allure como artefacto
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: allure-report/
+
   publicar-reporte:
     name: Publicar reporte en GitHub Pages
     runs-on: ubuntu-latest
-    needs: pruebas-integracion
+    needs: pruebas-e2e
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
