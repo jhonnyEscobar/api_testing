@@ -1,0 +1,49 @@
+name: CI - Pruebas Unitarias
+
+on:
+  push:
+    branches:
+      - main
+      - qa
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pruebas:
+    name: Instalar y ejecutar pruebas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar pruebas
+        run: npm run test:ci
+
+      - name: Publicar reporte de pruebas
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Resultados de pruebas
+          path: reports/junit.xml
+          reporter: jest-junit
+
+      - name: Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cobertura
+          path: coverage/
