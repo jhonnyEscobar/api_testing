@@ -1,0 +1,117 @@
+name: CI - Completo (Unitarias + Integración + Reporte)
+
+on:
+  push:
+    branches:
+      - main
+      - qa
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pruebas-unitarias:
+    name: Pruebas unitarias
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar pruebas unitarias
+        run: npm run test:ci
+
+      - name: Publicar reporte de pruebas unitarias
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Resultados unitarias
+          path: reports/junit.xml
+          reporter: jest-junit
+
+  pruebas-integracion:
+    name: Pruebas de integración (API)
+    runs-on: ubuntu-latest
+    needs: pruebas-unitarias
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar pruebas de integración
+        run: npx jest tests/api.test.js --reporters=default --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT_DIR: reports
+          JEST_JUNIT_OUTPUT_NAME: junit-integracion.xml
+
+      - name: Publicar reporte de integración
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Resultados integración
+          path: reports/junit-integracion.xml
+          reporter: jest-junit
+
+  publicar-reporte:
+    name: Publicar reporte en GitHub Pages
+    runs-on: ubuntu-latest
+    needs: pruebas-integracion
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install jest-html-reporter --save-dev
+
+      - name: Generar reporte HTML
+        run: npx jest --reporters=jest-html-reporter
+        env:
+          JEST_HTML_REPORTER_OUTPUT_PATH: reports/index.html
+          JEST_HTML_REPORTER_PAGE_TITLE: Reporte de Pruebas - API Productos
+
+      - name: Subir reporte a Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports/
+
+      - name: Publicar en GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
