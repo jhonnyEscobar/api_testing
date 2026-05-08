@@ -115,7 +115,7 @@ jobs:
           path: allure-report/
 
   publicar-reporte:
-    name: Publicar reporte en GitHub Pages
+    name: Publicar reporte Allure en GitHub Pages
     runs-on: ubuntu-latest
     needs: pruebas-e2e
     if: github.ref == 'refs/heads/main'
@@ -128,28 +128,16 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
 
     steps:
-      - name: Clonar repositorio
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - name: Descargar reporte Allure
+        uses: actions/download-artifact@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Instalar dependencias
-        run: npm install jest-html-reporter --save-dev
-
-      - name: Generar reporte HTML
-        run: npx jest --reporters=jest-html-reporter
-        env:
-          JEST_HTML_REPORTER_OUTPUT_PATH: reports/index.html
-          JEST_HTML_REPORTER_PAGE_TITLE: Reporte de Pruebas - API Productos
+          name: allure-report
+          path: allure-report/
 
       - name: Subir reporte a Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: reports/
+          path: allure-report/
 
       - name: Publicar en GitHub Pages
         id: deploy

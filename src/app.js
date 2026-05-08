@@ -10,6 +10,7 @@ const repositorio = new RepositorioProductos();
 const servicio = new ServicioProductos(repositorio);
 
 app.use('/productos', crearRutasProductos(servicio));
+console.log('Rutas de productos registradas');
 
 app.get('/', (req, res) => {
   res.json({ mensaje: 'API de Productos funcionando' });
