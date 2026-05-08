@@ -7,7 +7,9 @@
     "start": "node src/app.js",
     "test": "jest --coverage",
     "test:ci": "jest --coverage --reporters=default --reporters=jest-junit",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "allure generate allure-results --clean -o allure-report && allure open allure-report"
   },
   "jest-junit": {
     "outputDirectory": "reports",
@@ -19,6 +21,9 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "@playwright/test": "^1.44.0",
+    "allure-playwright": "^3.0.0",
+    "allure-commandline": "^2.29.0"
   }
 }
